@@ -12,15 +12,14 @@ router = APIRouter(tags=["upload"])
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
 
 @router.post("/upload")
-async def upload(file: UploadFile = File(...), request: Request = None):
+async def upload(request: Request, file: UploadFile = File(...)):
     # Rate limiting: 5 uploads per hour per IP
-    if request:
-        identifier = get_client_identifier(request)
-        if not rate_limiter.is_allowed(identifier, max_requests=5, window_seconds=3600):
-            raise HTTPException(
-                status_code=429,
-                detail="Rate limit exceeded. Maximum 5 uploads per hour."
-            )
+    identifier = get_client_identifier(request)
+    if not rate_limiter.is_allowed(identifier, max_requests=5, window_seconds=3600):
+        raise HTTPException(
+            status_code=429,
+            detail="Rate limit exceeded. Maximum 5 uploads per hour."
+        )
     # Validate file type
     if file.content_type not in ("application/pdf", "application/octet-stream"):
         raise HTTPException(

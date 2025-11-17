@@ -1,16 +1,9 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import upload, summarize, ask, documents
 from utils.config import ENVIRONMENT, ALLOWED_ORIGINS
 
 app = FastAPI(title="AI Document Assistant")
-
-# Middleware to inject Request into upload endpoint
-@app.middleware("http")
-async def add_request_to_upload(request: Request, call_next):
-    # Store request in state for use in upload endpoint
-    response = await call_next(request)
-    return response
 
 # CORS configuration - tighter for production
 if ENVIRONMENT == "production":
