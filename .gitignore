@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/.turbo
+frontend/node_modules/
+
+# Testing
+frontend/coverage/
+backend/.pytest_cache/
+backend/htmlcov/
+*.cover
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vector store data (can be regenerated)
+backend/data/vector_store/*.faiss
+backend/data/vector_store/*.meta.json
+
+# Build outputs
+*.pyc
+*.pyo
