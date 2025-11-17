@@ -3,6 +3,8 @@ from functools import lru_cache
 from collections import defaultdict
 from datetime import datetime, timedelta
 import time
+import hashlib
+from utils.logger import log_rate_limit_violation
 
 # Simple in-memory rate limiter
 # For production, consider using Redis or a proper rate limiting library
@@ -26,8 +28,13 @@ class RateLimiter:
                     del self.requests[key]
             self.last_cleanup = current_time
 
-    def is_allowed(self, identifier: str, max_requests: int, window_seconds: int) -> bool:
-        """Check if request is allowed"""
+    def is_allowed(self, identifier: str, max_requests: int, window_seconds: int) -> tuple:
+        """
+        Check if request is allowed
+        
+        Returns:
+            (is_allowed, remaining_requests, reset_after_seconds)
+        """
         self._cleanup_old_entries()
         
         current_time = time.time()
@@ -40,21 +47,37 @@ class RateLimiter:
         ]
         
         # Check if limit exceeded
-        if len(self.requests[identifier]) >= max_requests:
-            return False
+        request_count = len(self.requests[identifier])
+        if request_count >= max_requests:
+            # Calculate reset time
+            oldest_request = min(self.requests[identifier]) if self.requests[identifier] else current_time
+            reset_after = int(window_seconds - (current_time - oldest_request))
+            return False, 0, reset_after
         
         # Add current request
         self.requests[identifier].append(current_time)
-        return True
+        remaining = max_requests - request_count - 1
+        reset_after = window_seconds
+        return True, remaining, reset_after
 
 # Global rate limiter instance
 rate_limiter = RateLimiter()
 
 def get_client_identifier(request: Request) -> str:
-    """Get a unique identifier for the client"""
-    # Use IP address as identifier
+    """
+    Get a unique identifier for the client using multiple factors
+    Combines IP, User-Agent, and other headers for better identification
+    """
     client_ip = request.client.host if request.client else "unknown"
-    return client_ip
+    user_agent = request.headers.get("user-agent", "")
+    
+    # Create a combined identifier hash for better tracking
+    # In production, consider using Redis with IP + fingerprint
+    combined = f"{client_ip}:{user_agent}"
+    identifier_hash = hashlib.md5(combined.encode()).hexdigest()
+    
+    # Return IP for logging, but use hash for rate limiting
+    return f"{client_ip}:{identifier_hash[:8]}"
 
 def rate_limit(max_requests: int = 10, window_seconds: int = 60):
     """

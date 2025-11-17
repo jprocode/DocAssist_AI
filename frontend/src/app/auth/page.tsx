@@ -7,8 +7,6 @@ import { Input } from "@/components/Input";
 import { Card } from "@/components/Card";
 import toast from "react-hot-toast";
 
-const PASSWORD = 'qwieudnvvnru2849shsshUIBDYIWNND8R93SUIe!!!!!1122123';
-
 export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);

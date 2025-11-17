@@ -53,3 +53,11 @@ backend/data/vector_store/*.meta.json
 # Build outputs
 *.pyc
 *.pyo
+
+DEPLOYMENT.md
+TESTING_GUIDE.md
+*.md
+
+DEPLOYMENT.md
+TESTING_GUIDE.md
+QUICK_FIX.md

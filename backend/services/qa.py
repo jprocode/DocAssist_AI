@@ -130,7 +130,7 @@ def answer_with_context(
             "Answer the question using ONLY the document context provided above. "
             "Cite which snippets you used by numbering them (e.g., [1], [2]). "
             "If the answer is not in the context, say you don't know."
-        )
+    )
     
     resp = _client.chat.completions.create(
         model=OPENAI_CHAT_MODEL,

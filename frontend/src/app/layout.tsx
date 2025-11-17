@@ -23,7 +23,7 @@ export default function RootLayout({
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <span className="text-2xl">📄</span>
                 DocAssist AI
-              </h2>
+            </h2>
             </div>
 
             <nav className="flex flex-col gap-3" role="navigation" aria-label="Main navigation">

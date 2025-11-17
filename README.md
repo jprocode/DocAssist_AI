@@ -62,6 +62,16 @@ OPENAI_CHAT_MODEL=gpt-4o-mini
 OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 TAVILY_API_KEY=your_tavily_api_key_here  # Optional
 VECTOR_DIR=./data/vector_store
+ENVIRONMENT=development
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+
+# Authentication (choose one):
+# Option 1: Plain text password (for development only)
+AUTH_PASSWORD=your_password_here
+
+# Option 2: Hashed password (recommended for production)
+# Generate hash using: python -c "from backend.utils.security import hash_password; print(hash_password('your_password'))"
+# AUTH_PASSWORD_HASH=$2b$12$...
 ```
 
 5. Start the backend server:
@@ -84,6 +94,14 @@ npm install
 3. Create a `.env.local` file (optional, defaults to localhost:8000):
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
+
+# Authentication (must match backend .env)
+# Option 1: Plain text password (for development only)
+AUTH_PASSWORD=your_password_here
+
+# Option 2: Hashed password (recommended for production)
+# Generate hash using: python -c "from backend.utils.security import hash_password; print(hash_password('your_password'))"
+# AUTH_PASSWORD_HASH=$2b$12$...
 ```
 
 4. Start the development server:
@@ -222,13 +240,68 @@ npm run build
 npm start
 ```
 
-## Security Notes
+## Security Features
 
-- **CORS**: In development mode, CORS allows all origins. In production (set `ENVIRONMENT=production`), CORS is restricted to `ALLOWED_ORIGINS`.
-- **File Uploads**: Limited to 50MB and PDF files only.
-- **API Keys**: Should be kept secure and never committed to version control. Use environment variables.
-- **Rate Limiting**: Consider implementing rate limiting for production use.
-- **Input Validation**: All inputs are validated on both frontend and backend.
+### Authentication
+- **Password Protection**: The application requires a password to access. Passwords can be stored as plain text (development only) or hashed using bcrypt (production recommended).
+- **Brute Force Protection**: Failed login attempts are tracked with exponential backoff delays. After 5 failed attempts, IPs are locked for 15 minutes.
+- **Session Management**: Authentication cookies are httpOnly, secure in production, and use SameSite=strict in production.
+
+### Rate Limiting
+- **Upload Endpoint**: 5 uploads per hour per IP
+- **Ask Endpoint**: 20 requests per minute per IP
+- **Summarize Endpoint**: 10 requests per minute per IP
+- **Documents Endpoint**: 30 requests per minute per IP
+- Rate limit headers (`X-RateLimit-*`) are included in responses
+
+### File Upload Security
+- **File Size Limits**: Maximum 50MB per file
+- **File Type Validation**: Only PDF files are accepted
+- **File Signature Validation**: PDF magic bytes are verified (not just MIME type)
+- **Filename Sanitization**: Filenames are sanitized to prevent path traversal attacks
+- **Request Size Limits**: Request bodies are limited to 50MB
+
+### Input Validation
+- **Question Length**: Maximum 2000 characters
+- **Input Sanitization**: All user inputs are validated and sanitized
+- **Pydantic Models**: Request validation using Pydantic models
+
+### Security Headers
+- **X-Content-Type-Options**: nosniff
+- **X-Frame-Options**: DENY
+- **X-XSS-Protection**: 1; mode=block
+- **Referrer-Policy**: strict-origin-when-cross-origin
+- **Strict-Transport-Security**: Enabled in production (HSTS)
+- **Content-Security-Policy**: Configured for XSS protection
+
+### CORS Configuration
+- **Development**: Allows all origins for easier development
+- **Production**: Restricted to `ALLOWED_ORIGINS` environment variable
+
+### Security Logging
+- Failed login attempts are logged with IP and User-Agent
+- Rate limit violations are logged
+- File upload attempts (success/failure) are logged
+- Security events are logged to stdout (can be redirected to log files)
+
+### Additional Security Measures
+- **Operation Timeouts**: AI operations have 30-second timeouts to prevent hanging requests
+- **Error Handling**: Generic error messages prevent information leakage
+- **Request Size Limits**: Middleware enforces maximum request body size
+- **Password Hashing**: bcrypt with salt for secure password storage
+
+## Security Best Practices
+
+1. **Change Default Password**: After first deployment, change the password immediately
+2. **Use Hashed Passwords**: Generate a bcrypt hash for production:
+   ```bash
+   python -c "from backend.utils.security import hash_password; print(hash_password('your_secure_password'))"
+   ```
+3. **Environment Variables**: Never commit `.env` files or expose API keys
+4. **HTTPS**: Always use HTTPS in production
+5. **Regular Updates**: Keep dependencies updated for security patches
+6. **Monitor Logs**: Review security logs regularly for suspicious activity
+7. **Rate Limiting**: Consider Redis-based rate limiting for distributed deployments
 
 ## License
 

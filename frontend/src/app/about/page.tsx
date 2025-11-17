@@ -95,7 +95,7 @@ export default function AboutPage() {
             </li>
             <li className="flex gap-4">
               <span className="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold">4</span>
-              <div>
+    <div>
                 <strong className="text-gray-900">Enable Web Search (Optional)</strong>
                 <p className="text-sm text-gray-600 mt-1">For complex questions, enable web search to get additional context</p>
               </div>
@@ -108,9 +108,9 @@ export default function AboutPage() {
           <p className="text-gray-700 leading-relaxed">
             Your documents are processed securely and stored locally. We use vector embeddings to enable 
             fast and accurate document search. Your data remains private and is not shared with third parties.
-          </p>
+      </p>
         </Card>
-      </div>
+    </div>
     </main>
   );
 }

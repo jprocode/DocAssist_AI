@@ -1,8 +1,10 @@
 import os
 import json
 from typing import List, Dict
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from utils.config import VECTOR_DIR
+from routers.rate_limit import get_client_identifier, rate_limiter
+from utils.logger import log_rate_limit_violation
 
 router = APIRouter(tags=["documents"])
 
@@ -16,8 +18,26 @@ def get_document_metadata(doc_id: str) -> Dict:
         return json.load(f)
 
 @router.get("/documents")
-def list_documents():
+def list_documents(request: Request):
     """List all uploaded documents."""
+    client_ip = get_client_identifier(request).split(':')[0]
+    user_agent = request.headers.get("user-agent", "Unknown")
+    
+    # Rate limiting: 30 requests per minute per IP
+    identifier = get_client_identifier(request)
+    is_allowed, remaining, reset_after = rate_limiter.is_allowed(identifier, max_requests=30, window_seconds=60)
+    if not is_allowed:
+        log_rate_limit_violation(client_ip, "/api/documents", user_agent)
+        raise HTTPException(
+            status_code=429,
+            detail=f"Rate limit exceeded. Maximum 30 requests per minute. Try again in {reset_after} seconds.",
+            headers={
+                "X-RateLimit-Limit": "30",
+                "X-RateLimit-Remaining": "0",
+                "X-RateLimit-Reset": str(reset_after)
+            }
+        )
+    
     if not os.path.exists(VECTOR_DIR):
         return {"documents": []}
     

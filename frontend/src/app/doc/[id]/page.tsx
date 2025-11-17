@@ -18,6 +18,8 @@ export default function DocPage({ params }: { params: Promise<{ id: string }> })
 
   const [summary, setSummary] = useState<string>("");
   const [summaryLoading, setSummaryLoading] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [expandingSummary, setExpandingSummary] = useState(false);
   const [q, setQ] = useState("");
   const [chat, setChat] = useState<{ 
     q: string; 
@@ -31,14 +33,34 @@ export default function DocPage({ params }: { params: Promise<{ id: string }> })
   useEffect(() => {
     if (!id) return;
     setSummaryLoading(true);
-    summarize(id)
-      .then((res) => setSummary(res.summary))
+    setIsExpanded(false);
+    summarize(id, false)
+      .then((res) => {
+        setSummary(res.summary);
+        setIsExpanded(res.expanded || false);
+      })
       .catch((e: unknown) => {
         const errorMessage = e instanceof Error ? e.message : "Failed to generate summary";
         toast.error(errorMessage);
       })
       .finally(() => setSummaryLoading(false));
   }, [id]);
+
+  async function handleExpandSummary() {
+    if (!id || isExpanded || expandingSummary) return;
+    setExpandingSummary(true);
+    try {
+      const res = await summarize(id, true);
+      setSummary(res.summary);
+      setIsExpanded(true);
+      toast.success("Summary expanded successfully!");
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "Failed to expand summary";
+      toast.error(errorMessage);
+    } finally {
+      setExpandingSummary(false);
+    }
+  }
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -117,14 +139,32 @@ export default function DocPage({ params }: { params: Promise<{ id: string }> })
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
           ) : (
-            <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
-              {summary || "No summary available"}
-            </div>
+            <>
+              <div className="whitespace-pre-wrap text-gray-700 leading-relaxed mb-4">
+                {summary || "No summary available"}
+              </div>
+              {!isExpanded && summary && (
+                <div className="pt-4 border-t border-gray-200">
+                  <Button
+                    onClick={handleExpandSummary}
+                    isLoading={expandingSummary}
+                    disabled={expandingSummary}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    {expandingSummary ? "Expanding..." : "Expand Summary"}
+                  </Button>
+                  <p className="text-xs text-gray-500 mt-2 text-center">
+                    Get a more detailed, in-depth summary
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </Card>
 
         <Card title="Chat with Dr.Doc" className="flex flex-col" padding="lg">
-          <div 
+          <div
             className="flex-1 min-h-[400px] max-h-[600px] overflow-y-auto mb-6"
             role="log"
             aria-label="Chat conversation with Dr.Doc"
@@ -136,7 +176,7 @@ export default function DocPage({ params }: { params: Promise<{ id: string }> })
                 <div className="text-center">
                   <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl">💬</span>
-                  </div>
+                </div>
                   <p className="text-lg font-medium">Ask a question about this document</p>
                   <p className="text-sm mt-2">Dr.Doc is ready to help you understand your document</p>
                 </div>
@@ -173,7 +213,7 @@ export default function DocPage({ params }: { params: Promise<{ id: string }> })
 
           <div className="border-t border-gray-200 pt-4 space-y-4">
             <label className="flex items-center gap-3 cursor-pointer group">
-              <input
+            <input
                 type="checkbox"
                 checked={useWebSearch}
                 onChange={(e) => setUseWebSearch(e.target.checked)}
@@ -198,8 +238,8 @@ export default function DocPage({ params }: { params: Promise<{ id: string }> })
 
             <div className="flex gap-3" role="form" aria-label="Question input form">
               <Input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !busy && q.trim()) {
                     e.preventDefault();
@@ -211,7 +251,7 @@ export default function DocPage({ params }: { params: Promise<{ id: string }> })
                 className="flex-1"
                 aria-label="Question input"
                 aria-describedby="question-help"
-              />
+            />
               <Button 
                 onClick={handleAsk} 
                 isLoading={busy} 
@@ -226,7 +266,7 @@ export default function DocPage({ params }: { params: Promise<{ id: string }> })
             </p>
           </div>
         </Card>
-      </div>
+        </div>
     </main>
   );
 }

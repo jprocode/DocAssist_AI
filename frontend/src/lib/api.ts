@@ -11,6 +11,7 @@ export interface UploadResponse {
 export interface SummarizeResponse {
   doc_id: string;
   summary: string;
+  expanded?: boolean;
 }
 
 export interface AskResponse {
@@ -52,8 +53,8 @@ export async function uploadPdf(file: File): Promise<UploadResponse> {
   return res.json();
 }
 
-export async function summarize(docId: string): Promise<SummarizeResponse> {
-  const res = await fetch(`${BASE_URL}/summarize?doc_id=${docId}`, {
+export async function summarize(docId: string, expanded: boolean = false): Promise<SummarizeResponse> {
+  const res = await fetch(`${BASE_URL}/summarize?doc_id=${docId}&expanded=${expanded}`, {
     method: "POST",
   });
 

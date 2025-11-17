@@ -144,14 +144,14 @@ export default function HomePage() {
                 </p>
                 <p className="text-sm text-gray-500 mt-2">or</p>
               </div>
-              <input
+      <input
                 ref={fileInputRef}
-                type="file"
-                accept="application/pdf"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
+        type="file"
+        accept="application/pdf"
+        onChange={(e) => setFile(e.target.files?.[0] || null)}
                 className="hidden"
                 aria-label="Select PDF file to upload"
-              />
+      />
               <Button
                 onClick={() => fileInputRef.current?.click()}
                 variant="outline"
