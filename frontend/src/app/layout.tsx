@@ -23,42 +23,35 @@ export default function RootLayout({
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <span className="text-2xl">📄</span>
                 DocAssist AI
-            </h2>
+              </h2>
             </div>
 
             <nav className="flex flex-col gap-3" role="navigation" aria-label="Main navigation">
-              <Link 
-                href="/" 
+              <Link
+                href="/"
                 className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                 aria-label="Home page"
               >
                 <span aria-hidden="true">🏠</span>
                 <span>Home</span>
               </Link>
-              <Link 
-                href="/documents" 
+              <Link
+                href="/documents"
                 className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                 aria-label="Documents page"
               >
                 <span aria-hidden="true">📚</span>
                 <span>Documents</span>
               </Link>
-              <Link 
-                href="/about" 
+              <Link
+                href="/about"
                 className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                 aria-label="About page"
               >
                 <span aria-hidden="true">ℹ️</span>
                 <span>About</span>
               </Link>
-              <Link 
-                href="/api/auth/logout" 
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 mt-auto"
-                aria-label="Logout"
-              >
-                <span aria-hidden="true">🚪</span>
-                <span>Logout</span>
-              </Link>
+
             </nav>
 
             <footer className="mt-auto text-xs text-gray-400">

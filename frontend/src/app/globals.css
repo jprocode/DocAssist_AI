@@ -40,3 +40,9 @@ a:hover {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
+
+/* Override Next.js portal positioning */
+nextjs-portal {
+  left: unset;
+  top: unset;
+}
